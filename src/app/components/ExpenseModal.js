@@ -1,25 +1,11 @@
 'use client'
 import { useState } from "react";
-
+import ExpenseOptions from "./ExpenseComponent/ExpenseOptions";
+import ExpenseList from "./ExpenseComponent/ExpenseList";
 export default function ExpenseModal({ expenses, onClose }) {
 
     const [position, setPosition] = useState("bottom"); // bottom, middle, top
-    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth()); // Default ke bulan saat ini
 
-    const months = [
-        "Januari",
-        "Februari",
-        "Maret",
-        "April",
-        "Mei",
-        "Juni",
-        "Juli",
-        "Agustus",
-        "September",
-        "Oktober",
-        "November",
-        "Desember",
-    ];
 
     const handleDrag = (e) => {
         const dragY = e.touches[0].clientY;
@@ -60,41 +46,9 @@ export default function ExpenseModal({ expenses, onClose }) {
                 <h2 className="text-lg font-semibold text-gray-800">Expenses</h2>
             </div>
 
-            <div className="mt-2 flex overflow-x-auto space-x-3 scrollbar-hide">
-                {months.map((month, index) => (
-                    <button
-                        key={month}
-                        className={`px-4 py-2 text-sm rounded-lg ${selectedMonth === index
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-200 text-gray-600"
-                            }`}
-                        onClick={() => setSelectedMonth(index)}
-                    >
-                        {month}
-                    </button>
-                ))}
-            </div>
-
+            <ExpenseOptions />
             {/* Scrollable Content */}
-            <div className="p-4 h-full overflow-y-auto">
-                {expenses.length > 0 ? (
-                    <ul className="space-y-3">
-                        {expenses.map((expense) => (
-                            <li
-                                key={expense.id}
-                                className="flex justify-between items-center border-b pb-2"
-                            >
-                                <span className="text-gray-700">{expense.name}</span>
-                                <span className="text-gray-600">
-                                    Rp {expense.amount.toLocaleString()}
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p className="text-gray-500 text-center mt-4">No expenses available.</p>
-                )}
-            </div>
+            <ExpenseList expenses={expenses} />
         </div>
     );
 }
