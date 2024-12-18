@@ -1,11 +1,28 @@
 'use client'
-import React from 'react'
-import AuthLayout from '../components/AuthComponent/AuthLayout'
-import Link from 'next/link'
+import React, { useState } from 'react'
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+// RTK
+import { useDispatch } from 'react-redux'
+import { useLoginUserMutation } from '@/lib/services/api';
+import { setCredentials } from '@/lib/features/authSlice'
 const Login = () => {
-    const handleSubmit = (e) => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const dispatch = useDispatch()
+    const router = useRouter()
+    const [loginUser, { isLoading, error }] = useLoginUserMutation();
+    const handleSubmit = async (e) => {
         e.preventDefault();
         // Add login logic here
+        try {
+            const response = await loginUser({ email: email, password: password }).unwrap();
+            console.log(response, 'line 17')
+            dispatch(setCredentials({ user: response.user, token: response.token }));
+            router.push('/financial-plans'); // Redirect ke halaman home
+        } catch (err) {
+            console.log(err, 'line 21')
+        }
     };
 
     return (
@@ -19,21 +36,29 @@ const Login = () => {
                         Manage your financial goals easily and effectively.
                     </p>
                 </div>
-                <form className="space-y-4">
+                <form className="space-y-4"
+                onSubmit={handleSubmit}
+                >
                     <div>
                         <label form="email" className="block text-sm font-medium text-gray-700">Email Address</label>
-                        <input type="email" id="email" name="email" placeholder="Enter your email" className="mt-2 px-4 py-2 w-full border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                        <input
+                            onChange={(e) => setEmail(e.target.value)}
+                            type="email" id="email" name="email" placeholder="Enter your email" className="mt-2 px-4 py-2 w-full border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required />
                     </div>
                     <div>
                         <label form="password" className="block text-sm font-medium text-gray-700">Password</label>
-                        <input type="password" id="password" name="password" placeholder="Enter your password" className="mt-2 px-4 py-2 w-full border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                        <input
+                            onChange={(e) => setPassword(e.target.value)}
+                            type="password" id="password" name="password" placeholder="Enter your password" className="mt-2 px-4 py-2 w-full border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required />
                     </div>
                     <div className="flex justify-between items-center">
-                        <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Login</button>
+                        <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            {isLoading ? 'Loading ... ' : 'Login'}
+                            </button>
                     </div>
                 </form>
                 <div className="mt-6 text-center">
-                    <p className="text-sm text-gray-600">Don't have an account? <a href="#" className="text-blue-500 hover:underline">Sign up</a></p>
+                    <p className="text-sm text-gray-600">Don't have an account? <Link href={'/register'}> <span className="text-blue-500 hover:underline">Sign up</span></Link></p>
                 </div>
             </div>
         </div>
