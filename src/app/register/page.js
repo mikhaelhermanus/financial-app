@@ -1,11 +1,21 @@
 'use client'
 import React, { useState } from 'react'
+import { useRegisterUserMutation } from '@/lib/services/api';
+import { useDispatch } from 'react-redux';
+import { setRegister } from '@/lib/features/registerSlice'
+import { useRouter } from 'next/navigation';
 const page = () => {
+    const [registerUser, { isLoading, error }] = useRegisterUserMutation();
+    const router = useRouter()
+    console.log(error, 'line 7')
     const [formData, setFormData] = useState({
+        username:"",
         email: "",
         password: "",
         confirmPassword: "",
     });
+
+    const dispatch = useDispatch()
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -22,7 +32,7 @@ const page = () => {
         confirmPassword: "",
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit =  async (e) => {
         e.preventDefault();
 
         let formErrors = {};
@@ -33,10 +43,15 @@ const page = () => {
             formErrors.confirmPassword = "Passwords do not match";
 
         if (Object.keys(formErrors).length === 0) {
-            console.log("line Form submitted", formData);
+            const res = await registerUser({name : formData.username, email: formData.email, password: formData.password})
+            if(error?.data?.error) {
+                alert(error?.data?.message)
+            }else{
+                dispatch(setRegister({ data: res.data}))
+                router.back()
+            }
             // Submit the form (e.g., send data to an API)
         } else {
-
             setErrors(formErrors);
         }
     };
@@ -48,18 +63,18 @@ const page = () => {
                     onSubmit={handleSubmit} 
                     className="space-y-4">
                     <div>
-                        {/* <label htmlFor="username" className="block text-sm font-semibold text-gray-700">
+                        <label htmlFor="username" className="block text-sm font-semibold text-gray-700">
                             Username
                         </label>
                         <input
                             type="text"
                             id="username"
                             name="username"
-                            // value={formData.username}
-                            // onChange={handleChange}
+                            value={formData.username}
+                            onChange={handleChange}
                             className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500"
-                        /> */}
-                        {/* {errors.username && <p className="text-red-500 text-xs">{errors.username}</p>} */}
+                        />
+                        {errors.username && <p className="text-red-500 text-xs">{errors.username}</p>}
                     </div>
 
                     <div>
@@ -111,9 +126,9 @@ const page = () => {
 
                     <button
                         type="submit"
-                        className="w-full py-2 mt-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full py-2 mt-4 bg-indigo-500 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
-                        Sign Up
+                        {isLoading ? 'loading ... ' : 'Sign Up'}
                     </button>
                 </form>
             </div>

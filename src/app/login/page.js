@@ -12,6 +12,7 @@ const Login = () => {
     const dispatch = useDispatch()
     const router = useRouter()
     const [loginUser, { isLoading, error }] = useLoginUserMutation();
+    console.log(error, 'line 15')
     const handleSubmit = async (e) => {
         e.preventDefault();
         // Add login logic here
